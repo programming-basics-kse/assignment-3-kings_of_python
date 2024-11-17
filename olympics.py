@@ -19,9 +19,9 @@ def parse_args():
         print("Please enter -medals as a second argument")
         sys.exit(1)
 
-    parsed_args = parser.parse_args(args)
-    parsed_args.medals = True
-    return parsed_args
+    args = parser.parse_args(args)
+    args.medals = True
+    return args
 
 def load_data():
     data = []
@@ -30,10 +30,10 @@ def load_data():
             reader = csv.DictReader(file, delimiter = "\t")
             for row in reader:
                 data.append(row)
+        return data
     except FileNotFoundError:
         print("File doesn't found")
         sys.exit(1)
-    return data
 
 def find_medals(data, country, year):
     have_medals = [row for row in data if
@@ -63,15 +63,18 @@ def main():
     args = parse_args()
     data = load_data()
     have_medals = find_medals(data, args.country, args.year)
+    count = count_medals(have_medals)
+    results = result(have_medals, count)
+
     if not have_medals:
         print("No medalists found")
         sys.exit(1)
-    count = count_medals(have_medals)
-    results = result(have_medals, count)
 
     if args.output:
         with open(args.output, "wt") as file:
             file.write(results)
+    else:
+        print(results)
 
 
 main()
