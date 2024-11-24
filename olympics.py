@@ -11,6 +11,7 @@ def parse_args():
     parser.add_argument("year", nargs="?", type=str, help = "The year of the event")
     parser.add_argument("-output", type=str, help = "File for output")
     parser.add_argument("-total", type= str, help = "Write -total")
+    parser.add_argument("-overall", nargs="+", type=str, help="Write -overall and countries you want")
 
     args = sys.argv[1:]
 
@@ -82,9 +83,40 @@ def total(data, year):
         total_result.append(f"{country} - {medals["Gold"]} - {medals['Silver']} - {medals['Bronze']}")
     return "\n".join(total_result)
 
+def overall(data, countries):
+    country_max = {}
+    yearmedals = {}
+    for country in countries:
+        country_fromdata = [row for row in data if row["Teams"] == country or row["NOC"] == country ]
+        for row in country_fromdata:
+            if row["Medal"] in ["Gold", "Silver", "Bronze"]:
+               year = row["Year"]
+               yearmedals[year] = 0
+               if year not in yearmedals:
+                   yearmedals[year] += 1
+
+        if yearmedals:
+            max_year = 0
+            max_amount = 0
+            for year, amount in yearmedals.items():
+                if amount > max_amount:
+                    max_year = year
+                    max_amount = amount
+            country_max[country] = (max_year, max_amount)
+        else:
+            country_max[country] = ("No medals", 0)
+
+
 def main():
     args = parse_args()
     data = load_data()
+
+
+    if args.overall:
+       max_result = overall(data, args.overall)
+       for country, (year, amount) in max_result.items():
+           print(f"{country}: Year with most medals - {year}, overall medals - {amount}")
+           return
 
     if args.total:
         total_data = total(data, args.total)
