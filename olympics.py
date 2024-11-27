@@ -7,33 +7,14 @@ def parse_args():
 
     parser.add_argument("file", type=str, help = "Address of the file")
     parser.add_argument("-medals", action = "store_true", help = "Write -medals")
-    parser.add_argument("country", nargs="?", type=str, help = "The country, team or code ")
-    parser.add_argument("year", nargs="?", type=str, help = "The year of the event")
     parser.add_argument("-output", type=str, help = "File for output")
     parser.add_argument("-total", type= str, help = "Write -total")
     parser.add_argument("-overall", nargs="+", type=str, help="Write -overall and countries you want")
+    parser.add_argument("country", nargs="?", type=str, help="The country, team or code ")
+    parser.add_argument("year", nargs="?", type=str, help="The year of the event")
 
-    args = sys.argv[1:]
-
-    if "-overall" in args:
-        overall_index = args.index("-overall")
-        all_countries = args[overall_index + 1:]
-        args = args[:overall_index]
-
-
-    elif "-total" in args:
-        total_index = args.index("-total")
-        args = args[:total_index + 1]
-
-    elif len(args)>1 and args[1] == "-medals":
-        args.pop(1)
-    else:
-        print("Please enter -medals as a second argument")
-        sys.exit(1)
-
-    parsed_args = parser.parse_args(args)
-    parsed_args.medals = True if "-medals" in args else False
-    return parsed_args
+    args = parser.parse_args()
+    return args
 
 def load_data():
     data = []
@@ -93,7 +74,7 @@ def overall(data, countries):
     country_max = {}
     for country in countries:
         yearmedals = {}
-        country_fromdata = [row for row in data if row["Team"] == country or row["NOC"] == country ]
+        country_fromdata = [row for row in data if row["Team"] == country or row["NOC"] == country]
         for row in country_fromdata:
             if row["Medal"] in ["Gold", "Silver", "Bronze"]:
                year = row["Year"]
@@ -132,22 +113,22 @@ def main():
         return
 
     if args.medals:
-        if not args.year or not args.country:
+        if not args.country or not args.year:
             print("Please enter both country and year")
             sys.exit(1)
 
-    have_medals = find_medals(data, args.country, args.year)
-    if not have_medals:
-        print("No medalists found")
-        sys.exit(1)
+        have_medals = find_medals(data, args.country, args.year)
+        if not have_medals:
+            print("No medalists found")
+            sys.exit(1)
 
-    count = count_medals(have_medals)
-    results = result(have_medals, count)
+        count = count_medals(have_medals)
+        results = result(have_medals, count)
 
-    if args.output:
-        with open(args.output, "wt") as file:
-            file.write(results)
-    else:
-        print(results)
+        if args.output:
+            with open(args.output, "wt") as file:
+                file.write(results)
+        else:
+            print(results)
 
 main()
