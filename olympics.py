@@ -15,9 +15,15 @@ def parse_args():
 
     args = sys.argv[1:]
 
-    if "-total" in args:
+    if "-overall" in args:
+        overall_index = args.index("-overall")
+        all_countries = args[overall_index + 1:]
+        args = args[:overall_index]
+
+
+    elif "-total" in args:
         total_index = args.index("-total")
-        args = args[:total_index + 2]
+        args = args[:total_index + 1]
 
     elif len(args)>1 and args[1] == "-medals":
         args.pop(1)
@@ -85,27 +91,29 @@ def total(data, year):
 
 def overall(data, countries):
     country_max = {}
-    yearmedals = {}
     for country in countries:
-        country_fromdata = [row for row in data if row["Teams"] == country or row["NOC"] == country ]
+        yearmedals = {}
+        country_fromdata = [row for row in data if row["Team"] == country or row["NOC"] == country ]
         for row in country_fromdata:
             if row["Medal"] in ["Gold", "Silver", "Bronze"]:
                year = row["Year"]
-               yearmedals[year] = 0
                if year not in yearmedals:
-                   yearmedals[year] += 1
+                   yearmedals[year] = 0
+               yearmedals[year] += 1
 
         if yearmedals:
-            max_year = 0
+            max_year = None
             max_amount = 0
-            for year, amount in yearmedals.items():
-                if amount > max_amount:
+            for year in yearmedals:
+                if yearmedals[year] > max_amount:
                     max_year = year
-                    max_amount = amount
+                    max_amount = yearmedals[year]
             country_max[country] = (max_year, max_amount)
         else:
             country_max[country] = ("No medals", 0)
 
+
+    return country_max
 
 def main():
     args = parse_args()
@@ -116,7 +124,7 @@ def main():
        max_result = overall(data, args.overall)
        for country, (year, amount) in max_result.items():
            print(f"{country}: Year with most medals - {year}, overall medals - {amount}")
-           return
+       return
 
     if args.total:
         total_data = total(data, args.total)
