@@ -2,19 +2,22 @@ import argparse
 import csv
 import sys
 
-def parse_args():
-    parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser()
 
-    parser.add_argument("file", type=str, help = "Address of the file")
-    parser.add_argument("-medals", action = "store_true", help = "Write -medals")
-    parser.add_argument("-output", type=str, help = "File for output")
-    parser.add_argument("-total", type= str, help = "Write -total")
-    parser.add_argument("-overall", nargs="+", type=str, help="Write -overall and countries you want")
-    parser.add_argument("country", nargs="?", type=str, help="The country, team or code ")
-    parser.add_argument("year", nargs="?", type=str, help="The year of the event")
+parser.add_argument("file", type=str, help="Address of the file")
+parser.add_argument("-medals", nargs="+", help="Write -medals")
+parser.add_argument("-output", type=str, help="File for output")
+parser.add_argument("-total", type=str, help="Write -total")
+parser.add_argument("-overall", nargs="+", type=str, help="Write -overall and countries you want")
+parser.add_argument("-interective", action='store_true', help="Write -interective to turn on interective mode" )
+args = parser.parse_args()
 
-    args = parser.parse_args()
-    return args
+medals = args.medals
+output = args.output
+total = args.total
+overall = args.overall
+interective = args.interective
+
 
 def load_data():
     data = []
@@ -74,7 +77,7 @@ def overall(data, countries):
     country_max = {}
     for country in countries:
         yearmedals = {}
-        country_fromdata = [row for row in data if row["Team"] == country or row["NOC"] == country]
+        country_fromdata = [row for row in data if row["Team"] == country or row["NOC"] == country ]
         for row in country_fromdata:
             if row["Medal"] in ["Gold", "Silver", "Bronze"]:
                year = row["Year"]
@@ -93,12 +96,24 @@ def overall(data, countries):
         else:
             country_max[country] = ("No medals", 0)
 
-
     return country_max
 
+def interective(data):
+    name_country = input("Write a country: ")
+    country_data1 = [row for row in data if row["Team"] == name_country or row["NOC"] == name_country ]
+    for row in country_data1:
+        if row[""]
+
 def main():
-    args = parse_args()
     data = load_data()
+
+    if medals != None:
+        if len(medals) == 2:
+            if medals[1].isdigit():
+                m_year= medals[1]
+                m_team = medals[0]
+
+    if args.interective:
 
 
     if args.overall:
@@ -112,23 +127,18 @@ def main():
         print(total_data)
         return
 
-    if args.medals:
-        if not args.country or not args.year:
-            print("Please enter both country and year")
-            sys.exit(1)
+    have_medals = find_medals(data, m_team, m_year)
+    if not have_medals:
+        print("No medalists found")
+        sys.exit(1)
 
-        have_medals = find_medals(data, args.country, args.year)
-        if not have_medals:
-            print("No medalists found")
-            sys.exit(1)
+    count = count_medals(have_medals)
+    results = result(have_medals, count)
 
-        count = count_medals(have_medals)
-        results = result(have_medals, count)
-
-        if args.output:
-            with open(args.output, "wt") as file:
-                file.write(results)
-        else:
-            print(results)
+    if args.output:
+        with open(args.output, "wt") as file:
+            file.write(results)
+    else:
+        print(results)
 
 main()
