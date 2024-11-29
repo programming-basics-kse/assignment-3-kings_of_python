@@ -101,11 +101,11 @@ def overall(data, countries):
 def interective(data):
     print("Interactive mode. If you want to exit enter - e")
     while True:
-        name_country = input("Write a country: ").strip()
+        name_country = input("Write a country: ").strip().lower()
         if name_country.lower() == "e":
             break
 
-        country_data1 = [row for row in data if row["Team"] == name_country or row["NOC"] == name_country ]
+        country_data1 = [row for row in data if row["Team"].lower() == name_country or row["NOC"].lower() == name_country ]
         if not country_data1:
             print(f"There is anything about {country_data1}. Please enter country one more time")
             continue
