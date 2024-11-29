@@ -99,11 +99,64 @@ def overall(data, countries):
     return country_max
 
 def interective(data):
-    name_country = input("Write a country: ")
-    country_data1 = [row for row in data if row["Team"] == name_country or row["NOC"] == name_country ]
-    for row in country_data1:
-        if row[""]
+    print("Interactive mode. If you want to exit enter - e")
+    while True:
+        name_country = input("Write a country: ").strip()
+        if name_country.lower() == "e":
+            break
 
+        country_data1 = [row for row in data if row["Team"] == name_country or row["NOC"] == name_country ]
+        if not country_data1:
+            print(f"There is anything about {country_data1}. Please enter country one more time")
+            continue
+
+        first_year = None
+        first_city = None
+        for row in country_data1:
+            if first_year is None or int(row["Year"]) < int(first_year):
+                first_year = row["Year"]
+                first_city = row["City"]
+
+        year_medals = {}
+        for row in country_data1:
+            if row["Medal"] in ["Gold", "Silver", "Bronze"]:
+                year = row["Year"]
+                if year not in year_medals:
+                    year_medals[year] = {"Gold": 0, "Silver": 0, "Bronze": 0}
+                year_medals[year][row["Medal"]] += 1
+
+        most_successful_year = None
+        no_success_year = None
+        max_medals = 0
+        min_medals = -1
+        for year in year_medals:
+            all_medals = sum(year_medals[year].values())
+            if all_medals > max_medals:
+                most_successful_year = year
+                max_medals = all_medals
+            elif all_medals < min_medals or min_medals == -1:
+                no_success_year = year
+                min_medals = all_medals
+
+        all_medals = {"Gold": 0, "Silver": 0, "Bronze": 0}
+        number_of_years = len(year_medals)
+        for medals in year_medals.values():
+            for medal in all_medals:
+                if medal in medals:
+                   all_medals[medal] += medals[medal]
+
+        average = {}
+        for medal, total in all_medals.items():
+            if number_of_years:
+                average[medal] = round(total / number_of_years, 2)
+            else:
+                average[medal] = 0
+
+        print(f"Statistics for {name_country}:")
+        print(f"First participation: {first_year} in {first_city}")
+        print(f"Most successful Olympics: {most_successful_year} with {max_medals} medals")
+        print(f"Least successful Olympics: {no_success_year} with {min_medals} medals")
+        print(f"Average medals per Olympics: Gold: {average['Gold']}, Silver: {average['Silver']}, Bronze: {average['Bronze']}")
 def main():
     data = load_data()
 
@@ -114,6 +167,7 @@ def main():
                 m_team = medals[0]
 
     if args.interective:
+        interective(data)
 
 
     if args.overall:
